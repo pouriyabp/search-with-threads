@@ -32,8 +32,7 @@ class MyThread implements Runnable {
             currentPlace += keys[i].length();
         }
         for (int i = 0; i < words.length; i++) {
-            if (search(words[i]) != null)
-                System.out.println("------------->" + words[i] + " found in thread " + name + " : " + search(words[i]));
+            System.out.println("------------->" + words[i] + " found in thread " + name + " : " + search(words[i]));
         }
 
         System.out.println(name + " exiting.");
