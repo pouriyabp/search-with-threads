@@ -15,15 +15,17 @@ class MyThread implements Runnable {
     String text;
     String[] words;
     Semaphore mutex;
+    Semaphore semaphore;
     //true for semaphore and false for mutex_lock
     boolean type;
 
-    MyThread(String threadNumber, String text, String[] arr_words, Semaphore mutex, boolean type) {
+    MyThread(String threadNumber, String text, String[] arr_words, Semaphore mutex, Semaphore semaphore, boolean type) {
         name = threadNumber;
         this.text = text;
         words = arr_words;
         this.mutex = mutex;
         this.type = type;
+        this.semaphore = semaphore;
         t = new Thread(this, name);
         t.start();
     }
@@ -51,6 +53,7 @@ class MyThread implements Runnable {
                     now we should use semaphore and mutex lock here.
                  */
                 if (!type) {
+                    //mutex lock
                     try {
                         mutex.acquire();
                         long endWrite = System.currentTimeMillis();
@@ -70,14 +73,34 @@ class MyThread implements Runnable {
 
                     mutex.release();
 
+                } else {
+                    //semaphore
+                    try {
+
+                        System.out.println("the semaphore avalible in thread " + name + " is " + semaphore.availablePermits());
+                        // Aquire a permit to proceed
+                        semaphore.acquire();
+                        long endWrite = System.currentTimeMillis();
+                        myText += " and write in file in " + (endWrite - startTime) + "\n";
+                        FileWriter fileWritter = new FileWriter("output.txt", true);
+                        BufferedWriter bw = new BufferedWriter(fileWritter);
+                        bw.write(myText);
+                        bw.close();
+
+                    } catch (InterruptedException | IOException e) {
+                        e.printStackTrace();
+                    } finally {
+                        // Always release our permit
+                        semaphore.release();
+                    }
+
+
                 }
-            } else {
-
             }
-        }
 
-        System.out.println(name + " exiting.");
     }
+    }
+
 
     TrieNode root;
 
@@ -118,6 +141,7 @@ public class Main {
 
     public static void main(String[] args) {
         Semaphore mutex = new Semaphore(1);
+        Semaphore semaphore = new Semaphore(4);
         try {
             File f1 = new File("output.txt");
             if (f1.exists()) {
@@ -191,11 +215,11 @@ public class Main {
             String[] arr_of_search_words = words.split(" ");
             System.out.println("********************************************");
             //true for semaphore and false for mutex_lock
-            boolean type = false;
-            new MyThread("One", text1, arr_of_search_words, mutex, type);
-            new MyThread("Two", text2, arr_of_search_words, mutex, type);
-            new MyThread("Three", text3, arr_of_search_words, mutex, type);
-            new MyThread("Four", text4, arr_of_search_words, mutex, type);
+            boolean type = true;
+            new MyThread("One", text1, arr_of_search_words, mutex, semaphore, type);
+            new MyThread("Two", text2, arr_of_search_words, mutex, semaphore, type);
+            new MyThread("Three", text3, arr_of_search_words, mutex, semaphore, type);
+            new MyThread("Four", text4, arr_of_search_words, mutex, semaphore, type);
 
         } catch (FileNotFoundException e) {
             System.out.println("Error in open file!!");
