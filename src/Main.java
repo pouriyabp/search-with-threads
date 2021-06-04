@@ -88,6 +88,7 @@ public class Main {
             while (scan.hasNextLine()) {
                 data.append(scan.nextLine());
             }
+            scan.close();
             //split words in text and remove dots
             String text = data.toString();
             String[] arr_of_words = text.split(" ");
@@ -141,6 +142,7 @@ public class Main {
             }
             String words = words_in_file.toString();
             words = words.toLowerCase(Locale.ROOT);
+            scan.close();
             String[] arr_of_search_words = words.split(" ");
             System.out.println("********************************************");
             new MyThread("One", text1, arr_of_search_words);
