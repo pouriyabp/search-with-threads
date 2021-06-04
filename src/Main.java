@@ -21,6 +21,7 @@ class MyThread implements Runnable {
 
 
     public void run() {
+        final long startTime = System.currentTimeMillis();
         System.out.println("crate thread " + name + " and text is: " + text + "--->search words are: " + Arrays.toString(words));
         //--------------------------------------------------------------------------------------------------------------
 
@@ -32,8 +33,16 @@ class MyThread implements Runnable {
             currentPlace += key.length();
         }
         for (String word : words) {
-            if (search(word) != null)
-                System.out.println("------------->" + word + " found in thread " + name + " : " + search(word));
+            if (search(word) != null) {
+                final long endTime = System.currentTimeMillis();
+                //System.out.println("------------->" + word + " found in thread " + name + " : " + search(word) + " and find time is :" + (endTime - startTime));
+                String myText = word + "found in thread " + name + " : " + search(word) + " and find time is :" + (endTime - startTime);
+                System.out.println(myText);
+                /*
+                    now we should use semaphore and mutex lock here.
+                 */
+
+            }
         }
 
         System.out.println(name + " exiting.");
