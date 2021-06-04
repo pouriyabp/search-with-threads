@@ -46,6 +46,22 @@ class MyThread implements Runnable {
         current.isEndOfWord = true;
         current.occurences.add(occurence);
     }
+
+    static ArrayList<Integer> search(String word) {
+        int letter;
+        TrieNode current = root;
+
+        for (int i = 0; i < word.length(); i++) {
+            letter = word.charAt(i) - 97;
+            if (current.children[letter] == null)
+                return null;
+            current = current.children[letter];
+        }
+
+        if (current != null && current.isEndOfWord)
+            return current.occurences;
+        return null;
+    }
 }
 
 public class Main {
