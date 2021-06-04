@@ -27,20 +27,21 @@ class MyThread implements Runnable {
         String keys[] = text.split(" ");
         root = new TrieNode();
         int currentPlace = 1;
-        for (int i = 0; i < keys.length; i++) {
-            insert(keys[i], currentPlace);
-            currentPlace += keys[i].length();
+        for (String key : keys) {
+            insert(key, currentPlace);
+            currentPlace += key.length();
         }
-        for (int i = 0; i < words.length; i++) {
-            System.out.println("------------->" + words[i] + " found in thread " + name + " : " + search(words[i]));
+        for (String word : words) {
+            if (search(word) != null)
+                System.out.println("------------->" + word + " found in thread " + name + " : " + search(word));
         }
 
         System.out.println(name + " exiting.");
     }
 
-    static TrieNode root;
+    TrieNode root;
 
-    static void insert(String word, int occurence) {
+    void insert(String word, int occurence) {
         int letter;
         TrieNode current = root;
 
@@ -55,7 +56,7 @@ class MyThread implements Runnable {
         current.occurences.add(occurence);
     }
 
-    static ArrayList<Integer> search(String word) {
+    ArrayList<Integer> search(String word) {
         int letter;
         TrieNode current = root;
 
