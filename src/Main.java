@@ -29,6 +29,23 @@ class MyThread implements Runnable {
 
         System.out.println(name + " exiting.");
     }
+
+    static TrieNode root;
+
+    static void insert(String word, int occurence) {
+        int letter;
+        TrieNode current = root;
+
+        for (int i = 0; i < word.length(); i++) {
+            letter = word.charAt(i) - 97;
+            if (current.children[letter] == null)
+                current.children[letter] = new TrieNode();
+
+            current = current.children[letter];
+        }
+        current.isEndOfWord = true;
+        current.occurences.add(occurence);
+    }
 }
 
 public class Main {
