@@ -84,11 +84,23 @@ public class Main {
             System.out.println(text2);
             System.out.println(text3);
             System.out.println(text4);
+            //read search words
+            File search_file = new File("words.txt");
+            scan = new Scanner(search_file);
+            StringBuilder words_in_file = new StringBuilder();
+            //read data from file and put in string.
+            while (scan.hasNextLine()) {
+                words_in_file.append(scan.nextLine());
+                words_in_file.append(" ");
+            }
+            String words = words_in_file.toString();
+            words = words.toLowerCase(Locale.ROOT);
+            String[] arr_of_search_words = words.split(" ");
             System.out.println("********************************************");
-            new MyThread("One", text1);
-            new MyThread("Two", text2);
-            new MyThread("Three", text3);
-            new MyThread("Four", text4);
+            new MyThread("One", text1, arr_of_search_words);
+            new MyThread("Two", text2, arr_of_search_words);
+            new MyThread("Three", text3, arr_of_search_words);
+            new MyThread("Four", text4, arr_of_search_words);
 
         } catch (FileNotFoundException e) {
             System.out.println("Error in open file!!");
