@@ -1,27 +1,36 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Scanner;
+import java.util.concurrent.Semaphore;
+import java.io.BufferedWriter;
 
 class MyThread implements Runnable {
     String name;
     Thread t;
     String text;
     String[] words;
+    Semaphore mutex;
+    //true for semaphore and false for mutex_lock
+    boolean type;
 
-    MyThread(String threadNumber, String text, String[] arr_words) {
+    MyThread(String threadNumber, String text, String[] arr_words, Semaphore mutex, boolean type) {
         name = threadNumber;
         this.text = text;
         words = arr_words;
+        this.mutex = mutex;
+        this.type = type;
         t = new Thread(this, name);
         t.start();
     }
 
 
     public void run() {
-        final long startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
         System.out.println("crate thread " + name + " and text is: " + text + "--->search words are: " + Arrays.toString(words));
         //--------------------------------------------------------------------------------------------------------------
 
@@ -34,13 +43,35 @@ class MyThread implements Runnable {
         }
         for (String word : words) {
             if (search(word) != null) {
-                final long endTime = System.currentTimeMillis();
+                long endTime = System.currentTimeMillis();
                 //System.out.println("------------->" + word + " found in thread " + name + " : " + search(word) + " and find time is :" + (endTime - startTime));
-                String myText = word + "found in thread " + name + " : " + search(word) + " and find time is :" + (endTime - startTime);
+                String myText = word + " found in thread " + name + " : " + search(word) + " and find time is :" + (endTime - startTime);
                 System.out.println(myText);
                 /*
                     now we should use semaphore and mutex lock here.
                  */
+                if (!type) {
+                    try {
+                        mutex.acquire();
+                        long endWrite = System.currentTimeMillis();
+                        myText += " and write in file in " + (endWrite - startTime) + "\n";
+                        FileWriter fileWritter = new FileWriter("output.txt", true);
+                        BufferedWriter bw = new BufferedWriter(fileWritter);
+                        bw.write(myText);
+                        bw.close();
+
+                    } catch (InterruptedException exc) {
+                        System.out.println(exc);
+                    } catch (IOException e) {
+                        System.out.println("An error occurred.");
+                        e.printStackTrace();
+                    }
+
+
+                    mutex.release();
+
+                }
+            } else {
 
             }
         }
@@ -84,12 +115,17 @@ class MyThread implements Runnable {
 
 public class Main {
 
-    public void run(int num) {
-        System.out.println("This code is running in a thread" + num);
-    }
 
     public static void main(String[] args) {
+        Semaphore mutex = new Semaphore(1);
         try {
+            File f1 = new File("output.txt");
+            if (f1.exists()) {
+                FileWriter myWriter = new FileWriter("output.txt");
+                myWriter.write("");
+                myWriter.close();
+            }
+
             File input_file = new File("input.txt");
             Scanner scan = new Scanner(input_file);
             StringBuilder data = new StringBuilder();
@@ -154,13 +190,18 @@ public class Main {
             scan.close();
             String[] arr_of_search_words = words.split(" ");
             System.out.println("********************************************");
-            new MyThread("One", text1, arr_of_search_words);
-            new MyThread("Two", text2, arr_of_search_words);
-            new MyThread("Three", text3, arr_of_search_words);
-            new MyThread("Four", text4, arr_of_search_words);
+            //true for semaphore and false for mutex_lock
+            boolean type = false;
+            new MyThread("One", text1, arr_of_search_words, mutex, type);
+            new MyThread("Two", text2, arr_of_search_words, mutex, type);
+            new MyThread("Three", text3, arr_of_search_words, mutex, type);
+            new MyThread("Four", text4, arr_of_search_words, mutex, type);
 
         } catch (FileNotFoundException e) {
             System.out.println("Error in open file!!");
+            e.printStackTrace();
+        } catch (IOException e) {
+            System.out.println("An error occurred.");
             e.printStackTrace();
         }
     }
