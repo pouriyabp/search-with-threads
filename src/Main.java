@@ -1,16 +1,20 @@
-import java.io.File;  // Import the File class
-import java.io.FileNotFoundException;  // Import this class to handle errors
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.Scanner; // Import the Scanner class to read text files
+import java.util.Scanner;
 
 class MyThread implements Runnable {
     String name;
     Thread t;
     String text;
-    MyThread(String threadNumber, String text) {
+    String[] words;
+
+    MyThread(String threadNumber, String text, String[] arr_words) {
         name = threadNumber;
         this.text = text;
+        words = arr_words;
         t = new Thread(this, name);
         t.start();
     }
@@ -108,4 +112,17 @@ public class Main {
         }
     }
 
+}
+
+class TrieNode {
+    TrieNode[] children = new TrieNode[26];
+    boolean isEndOfWord;
+    ArrayList<Integer> occurences;
+
+    TrieNode() {
+        isEndOfWord = false;
+        occurences = new ArrayList<>();
+        for (int i = 0; i < 26; i++)
+            children[i] = null;
+    }
 }
