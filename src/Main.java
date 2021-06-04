@@ -21,10 +21,19 @@ class MyThread implements Runnable {
 
 
     public void run() {
-        System.out.println("crate thread "+name+" and text is: "+ text);
-        for (int i = 5; i > 0; i--) {
-            System.out.println(name + ": " + i);
+        System.out.println("crate thread " + name + " and text is: " + text + "--->search words are: " + Arrays.toString(words));
+        //--------------------------------------------------------------------------------------------------------------
 
+        String keys[] = text.split(" ");
+        root = new TrieNode();
+        int currentPlace = 1;
+        for (int i = 0; i < keys.length; i++) {
+            insert(keys[i], currentPlace);
+            currentPlace += keys[i].length();
+        }
+        for (int i = 0; i < words.length; i++) {
+            if (search(words[i]) != null)
+                System.out.println("------------->" + words[i] + " found in thread " + name + " : " + search(words[i]));
         }
 
         System.out.println(name + " exiting.");
