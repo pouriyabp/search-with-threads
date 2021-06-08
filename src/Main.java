@@ -57,12 +57,17 @@ class MyThread implements Runnable {
                 if (!type) {
                     //mutex lock
                     try {
+                        long waitTime = System.currentTimeMillis();
                         mutex.lock();
-                        long endWrite = System.currentTimeMillis();
-                        myText += " and write in file in " + (endWrite - startTime) + "\n";
+                        long enterTime = System.currentTimeMillis();
+                        myText += " and wait to get the lock " + (enterTime - waitTime);
+
                         FileWriter fileWritter = new FileWriter("output.txt", true);
                         BufferedWriter bw = new BufferedWriter(fileWritter);
                         bw.write(myText);
+                        long endWrite = System.currentTimeMillis();
+                        String newText = " write in " + (endWrite - startTime) + "\n";
+                        bw.write(newText);
                         bw.close();
 
 
@@ -221,7 +226,7 @@ public class Main {
             String[] arr_of_search_words = words.split(" ");
             System.out.println("********************************************");
             //true for semaphore and false for mutex_lock
-            boolean type = true;
+            boolean type = false;
             new MyThread("One", text1, arr_of_search_words, mutex, semaphore, type);
             new MyThread("Two", text2, arr_of_search_words, mutex, semaphore, type);
             new MyThread("Three", text3, arr_of_search_words, mutex, semaphore, type);
