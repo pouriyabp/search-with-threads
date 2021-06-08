@@ -37,7 +37,7 @@ class MyThread implements Runnable {
         System.out.println("crate thread " + name + " and text is: " + text + "--->search words are: " + Arrays.toString(words));
         //--------------------------------------------------------------------------------------------------------------
 
-        String keys[] = text.split(" ");
+        String[] keys = text.split(" ");
         root = new TrieNode();
         int currentPlace = 1;
         for (String key : keys) {
@@ -45,10 +45,11 @@ class MyThread implements Runnable {
             currentPlace += key.length();
         }
         for (String word : words) {
-            if (search(word) != null) {
+            ArrayList<Integer> res = search(word);
+            if (res != null) {
                 long endTime = System.currentTimeMillis();
                 //System.out.println("------------->" + word + " found in thread " + name + " : " + search(word) + " and find time is :" + (endTime - startTime));
-                String myText = word + " found in thread " + name + " : " + search(word) + " and find time is :" + (endTime - startTime);
+                String myText = word + " found in thread " + name + " : " + res + " and find time is :" + (endTime - startTime);
                 System.out.println(myText);
                 /*
                     now we should use semaphore and mutex lock here.
@@ -76,15 +77,20 @@ class MyThread implements Runnable {
                 } else {
                     //semaphore
                     try {
-
                         System.out.println("the semaphore avalible in thread " + name + " is " + semaphore.availablePermits());
+                        //start time for waiting
+                        long waitTime = System.currentTimeMillis();
                         // Aquire a permit to proceed
                         semaphore.acquire();
-                        long endWrite = System.currentTimeMillis();
-                        myText += " and write in file in " + (endWrite - startTime) + "\n";
+                        long enterTime = System.currentTimeMillis();
+                        myText += " and wait to get the semaphore " + (enterTime - waitTime);
                         FileWriter fileWritter = new FileWriter("output.txt", true);
+
                         BufferedWriter bw = new BufferedWriter(fileWritter);
                         bw.write(myText);
+                        long endWrite = System.currentTimeMillis();
+                        String newText = " write in " + (endWrite - startTime) + "\n";
+                        bw.write(newText);
                         bw.close();
 
                     } catch (InterruptedException | IOException e) {
@@ -220,7 +226,6 @@ public class Main {
             new MyThread("Two", text2, arr_of_search_words, mutex, semaphore, type);
             new MyThread("Three", text3, arr_of_search_words, mutex, semaphore, type);
             new MyThread("Four", text4, arr_of_search_words, mutex, semaphore, type);
-
         } catch (FileNotFoundException e) {
             System.out.println("Error in open file!!");
             e.printStackTrace();
