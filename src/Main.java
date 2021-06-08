@@ -8,18 +8,19 @@ import java.util.Locale;
 import java.util.Scanner;
 import java.util.concurrent.Semaphore;
 import java.io.BufferedWriter;
+import java.util.concurrent.locks.ReentrantLock;
 
 class MyThread implements Runnable {
     String name;
     Thread t;
     String text;
     String[] words;
-    Semaphore mutex;
+    ReentrantLock mutex;
     Semaphore semaphore;
     //true for semaphore and false for mutex_lock
     boolean type;
 
-    MyThread(String threadNumber, String text, String[] arr_words, Semaphore mutex, Semaphore semaphore, boolean type) {
+    MyThread(String threadNumber, String text, String[] arr_words, ReentrantLock mutex, Semaphore semaphore, boolean type) {
         name = threadNumber;
         this.text = text;
         words = arr_words;
@@ -55,7 +56,7 @@ class MyThread implements Runnable {
                 if (!type) {
                     //mutex lock
                     try {
-                        mutex.acquire();
+                        mutex.lock();
                         long endWrite = System.currentTimeMillis();
                         myText += " and write in file in " + (endWrite - startTime) + "\n";
                         FileWriter fileWritter = new FileWriter("output.txt", true);
@@ -63,15 +64,14 @@ class MyThread implements Runnable {
                         bw.write(myText);
                         bw.close();
 
-                    } catch (InterruptedException exc) {
-                        System.out.println(exc);
+
                     } catch (IOException e) {
                         System.out.println("An error occurred.");
                         e.printStackTrace();
                     }
 
 
-                    mutex.release();
+                    mutex.unlock();
 
                 } else {
                     //semaphore
@@ -98,7 +98,7 @@ class MyThread implements Runnable {
                 }
             }
 
-    }
+        }
     }
 
 
@@ -140,8 +140,9 @@ public class Main {
 
 
     public static void main(String[] args) {
-        Semaphore mutex = new Semaphore(1);
-        Semaphore semaphore = new Semaphore(4);
+        //Semaphore mutex = new Semaphore(1);
+        ReentrantLock mutex = new ReentrantLock();
+        Semaphore semaphore = new Semaphore(1);
         try {
             File f1 = new File("output.txt");
             if (f1.exists()) {
@@ -169,7 +170,6 @@ public class Main {
                 for (int j = 0; j < temp.length(); j++) {
 
                     if (temp.charAt(j) == '.' || temp.charAt(j) == ',' || temp.charAt(j) == '\"') {
-                        continue;
                     } else {
                         word_without_dot += temp.charAt(j);
                     }
